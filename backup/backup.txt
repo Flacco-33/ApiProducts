@@ -1,0 +1,253 @@
+//Paso 1 Importar Express
+const express = require("express");
+//Paso 2 Definir el servidor
+const app = express();
+//Paso3 Definir Puerto
+app.listen(3000);
+
+console.log("Servidor activo");
+
+//Para que Express entienda JSON se debe habilitar
+app.use(express.json());
+
+//un Middleware se define antes de las acciones
+app.use((req,res,next)=>{
+  console.log( `Solicitud: ${req.url}`)
+  console.log( `Metodo: ${req.method}`)
+  console.log(`Middleware 1`)
+  next()
+})
+
+
+app.get("/usuarios", (req,res)=>{
+  res.send("paguina de usuarios")
+})
+
+app.get("/inicio", (req,res)=>{
+  res.send("paguina de inicio")
+})
+app.get("/acercaDe", (req,res)=>{
+  res.send("paguina de Acerca DE")
+})
+app.get("/contacto", (req,res)=>{
+  res.send("paguina de Contacto")
+})
+
+app.get("/login", (req,res)=>{
+  
+  res.send("Inicio de secion")
+
+})
+
+app.use((req,res,next)=>{
+  if (req.query.usuario=="Flaco") {
+    console.log("Usuario autenticado")
+    next()
+  }else{
+    res.send("No autorizado")
+  }
+  console.log(`Middleware 2`)
+  
+})
+
+
+
+
+app.get("/principal", (req,res)=>{
+    res.send("principal")  
+})
+
+
+//endpoint
+app.get("/", (req, res) => {
+  res.send("Hola desde express :3");
+});
+
+app.get("/prueba", (req, res) => {
+  res.sendFile("./pages/index.html", {
+    root: __dirname,
+  });
+  console.log(__dirname);
+});
+
+app.get("/producto2", (req, res) => {
+  res.sendFile("./images/producto2.png", {
+    root: __dirname,
+  });
+});
+
+app.get("/alumnos", (req, res) => {
+    //res.send("get de alumnos");
+    res.json([{nombre: "Marco"}, {nombre:"Luis"}]);
+});
+
+app.post("/alumnos", (req, res) => {
+    res.send("Post de alumnos");
+    console.log(req.body);
+});
+
+app.put("/alumnos", (req, res) => {
+    res.send("put de alumnos");
+});
+
+app.delete("/alumnos", (req, res) => {
+    res.send("delete de alumnos");
+});
+
+app.all('/materias', (req, res) => {
+  res.send("ejemplo de endpoint compatible copn todo");
+});
+
+//Los dos puntos indican que esperan un dato
+app.get('/grupos/:idmateria/:idmodalidad', (req, res) => {
+  res.send("grupos");
+  const {idmateria,idmodalidad} = req.params;
+  console.log(idmateria);
+  console.log(idmodalidad);
+});
+
+//queryparam 
+app.get('/alumnos/sistemas', (req, res) => {
+    res.send("grupos");
+    console.log(req.query)
+});
+
+app.get('/alumnos/:nc/calificaciones', (req, res) => {
+    //res.send("grupos");
+    if (req.params.nc=="20TE0164") {
+        return res.send("Calificaciones de prueba") 
+    }
+    res.send("not found")
+});
+
+app.use((req, res)=>{
+    res.status(404).sendFile("./images/404.jpeg", {
+        root: __dirname,
+      });
+} );//Paso 1 Importar Express
+const express = require("express");
+//Paso 2 Definir el servidor
+const app = express();
+//Paso3 Definir Puerto
+app.listen(3000);
+
+console.log("Servidor activo");
+
+//Para que Express entienda JSON se debe habilitar
+app.use(express.json());
+
+//un Middleware se define antes de las acciones
+app.use((req,res,next)=>{
+  console.log( `Solicitud: ${req.url}`)
+  console.log( `Metodo: ${req.method}`)
+  console.log(`Middleware 1`)
+  next()
+})
+
+
+app.get("/usuarios", (req,res)=>{
+  res.send("paguina de usuarios")
+})
+
+app.get("/inicio", (req,res)=>{
+  res.send("paguina de inicio")
+})
+app.get("/acercaDe", (req,res)=>{
+  res.send("paguina de Acerca DE")
+})
+app.get("/contacto", (req,res)=>{
+  res.send("paguina de Contacto")
+})
+
+app.get("/login", (req,res)=>{
+  
+  res.send("Inicio de secion")
+
+})
+
+app.use((req,res,next)=>{
+  if (req.query.usuario=="Flaco") {
+    console.log("Usuario autenticado")
+    next()
+  }else{
+    res.send("No autorizado")
+  }
+  console.log(`Middleware 2`)
+  
+})
+
+
+
+
+app.get("/principal", (req,res)=>{
+    res.send("principal")  
+})
+
+
+//endpoint
+app.get("/", (req, res) => {
+  res.send("Hola desde express :3");
+});
+
+app.get("/prueba", (req, res) => {
+  res.sendFile("./pages/index.html", {
+    root: __dirname,
+  });
+  console.log(__dirname);
+});
+
+app.get("/producto2", (req, res) => {
+  res.sendFile("./images/producto2.png", {
+    root: __dirname,
+  });
+});
+
+app.get("/alumnos", (req, res) => {
+    //res.send("get de alumnos");
+    res.json([{nombre: "Marco"}, {nombre:"Luis"}]);
+});
+
+app.post("/alumnos", (req, res) => {
+    res.send("Post de alumnos");
+    console.log(req.body);
+});
+
+app.put("/alumnos", (req, res) => {
+    res.send("put de alumnos");
+});
+
+app.delete("/alumnos", (req, res) => {
+    res.send("delete de alumnos");
+});
+
+app.all('/materias', (req, res) => {
+  res.send("ejemplo de endpoint compatible copn todo");
+});
+
+//Los dos puntos indican que esperan un dato
+app.get('/grupos/:idmateria/:idmodalidad', (req, res) => {
+  res.send("grupos");
+  const {idmateria,idmodalidad} = req.params;
+  console.log(idmateria);
+  console.log(idmodalidad);
+});
+
+//queryparam 
+app.get('/alumnos/sistemas', (req, res) => {
+    res.send("grupos");
+    console.log(req.query)
+});
+
+app.get('/alumnos/:nc/calificaciones', (req, res) => {
+    //res.send("grupos");
+    if (req.params.nc=="20TE0164") {
+        return res.send("Calificaciones de prueba") 
+    }
+    res.send("not found")
+});
+
+app.use((req, res)=>{
+    res.status(404).sendFile("./images/404.jpeg", {
+        root: __dirname,
+      });
+} );
