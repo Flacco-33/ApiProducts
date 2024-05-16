@@ -75,8 +75,8 @@ app.get("/productos/:id", validateProductExistence, async (req, res) => {
 });
 
 // Crear un nuevo producto
-app.post("/productos",upoad.single('foto') ,validateProduct, async (req, res) => {
-  const { name, stock, price} = req.body;
+app.post("/productos" ,validateProduct, async (req, res) => {
+  const { name, stock, price, url} = req.body;
   try {
     const nuevoProducto =  prisma.Product.create({
       data: { name, stock, price,url },
@@ -190,33 +190,17 @@ app.post('/users/login', async (req, res) => {
 });
 
 app.post('/images',upoad.single('foto'),(req,res)=>{
-  const { name, stock, price} = req.body;
-  if (!req.file) {
-    return res.status(400).send('No image uploaded'); // Return a proper error message
-  }
   let path=req.file.destination+'/'+req.file.filename;
   let url;
   cloudinary.uploader.upload(
     path,
     {public_id:'prueba_foto'},
-    async (error,result)=>{
+    (error,result)=>{
       console.log(result.url)
-      url = result.url
-      // res.send(result.url)
-      try {
-        const nuevoProducto =  prisma.Product.create({
-          data: { name, stock, price, url },
-        });
-        res.json(nuevoProducto);
-      } catch (error) {
-        if (error.code === "P2002" && error.meta?.target?.includes("name")) {
-          return res.status(400).json({ mensaje: "Ya existe un producto con este nombre." });
-        }
-        console.error("Error al crear el producto:", error);
-        res.status(500).json({ mensaje: "Error interno del servidor." });
-      }
+      res.send(result.url)
     }
   );
+  //res.send("Finalizaod")
 })
 
 app.use((req, res)=>{
