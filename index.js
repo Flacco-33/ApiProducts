@@ -2,7 +2,20 @@
 const express = require("express");
 const {PrismaClient} = require("@prisma/client")
 
+const cloudinary = require('cloudinary').v2;
+const multer = require('multer')
+const path = require('path')
+
 const prisma = new PrismaClient()
+
+const storage = multer.diskStorage({
+  destination : './images',
+  filename:(req,file,cb)=>{
+    const nombre = `${Date.now()} - ${Math.round(Math.round()*1000)}`;
+    const ext=path.extname(file.originalname);
+    cb(null,`${file.fieldname}-${nombre}${ext}`);
+  }
+})
 //Paso 2 Definir el servidor
 const app = express();
 app.use(express.json());
@@ -10,6 +23,14 @@ app.use(express.json());
 app.listen(3000);
 
 console.log("Servidor activo");
+
+const upoad = multer({storage});
+          
+cloudinary.config({ 
+  cloud_name: 'da7vlqvco', 
+  api_key: '135949247446237', 
+  api_secret: 'rfwm32efz3iXtDjQZV9EVKJo4fc' 
+});
 
 // Middleware para validar campos no nulos
 const validateProduct = (req, res, next) => {
@@ -54,11 +75,11 @@ app.get("/productos/:id", validateProductExistence, async (req, res) => {
 });
 
 // Crear un nuevo producto
-app.post("/productos", validateProduct, async (req, res) => {
-  const { name, stock, price } = req.body;
+app.post("/productos",upoad.single('foto') ,validateProduct, async (req, res) => {
+  const { name, stock, price} = req.body;
   try {
-    const nuevoProducto = await prisma.Product.create({
-      data: { name, stock, price },
+    const nuevoProducto =  prisma.Product.create({
+      data: { name, stock, price,url },
     });
     res.json(nuevoProducto);
   } catch (error) {
@@ -68,6 +89,8 @@ app.post("/productos", validateProduct, async (req, res) => {
     console.error("Error al crear el producto:", error);
     res.status(500).json({ mensaje: "Error interno del servidor." });
   }
+  //res.send("Finalizaod")
+  
 });
 
 
@@ -165,6 +188,36 @@ app.post('/users/login', async (req, res) => {
   // Iniciar sesión exitosamente
   res.json({ mensaje: 'Inicio de sesión exitoso', user });
 });
+
+app.post('/images',upoad.single('foto'),(req,res)=>{
+  const { name, stock, price} = req.body;
+  if (!req.file) {
+    return res.status(400).send('No image uploaded'); // Return a proper error message
+  }
+  let path=req.file.destination+'/'+req.file.filename;
+  let url;
+  cloudinary.uploader.upload(
+    path,
+    {public_id:'prueba_foto'},
+    async (error,result)=>{
+      console.log(result.url)
+      url = result.url
+      // res.send(result.url)
+      try {
+        const nuevoProducto =  prisma.Product.create({
+          data: { name, stock, price, url },
+        });
+        res.json(nuevoProducto);
+      } catch (error) {
+        if (error.code === "P2002" && error.meta?.target?.includes("name")) {
+          return res.status(400).json({ mensaje: "Ya existe un producto con este nombre." });
+        }
+        console.error("Error al crear el producto:", error);
+        res.status(500).json({ mensaje: "Error interno del servidor." });
+      }
+    }
+  );
+})
 
 app.use((req, res)=>{
     res.status(404).send("not found")

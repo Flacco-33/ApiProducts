@@ -21,6 +21,7 @@ model Product {
   name      String     @db.VarChar(255) @unique
   stock     Int
   price     Float
+  photo     String     @db.VarChar(255) @unique
   users     User[]     @relation("UserProducts")
   favorites Favorite[]
 }
