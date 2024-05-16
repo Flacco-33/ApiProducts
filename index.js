@@ -75,22 +75,23 @@ app.get("/productos/:id", validateProductExistence, async (req, res) => {
 });
 
 // Crear un nuevo producto
-app.post("/productos" ,validateProduct, async (req, res) => {
-  const { name, stock, price, url} = req.body;
+
+app.post('/productos', validateProduct, async (req, res) => {
+  const { name, stock, price, photo } = req.body;
+
   try {
-    const nuevoProducto =  prisma.Product.create({
-      data: { name, stock, price,url },
+    const nuevoProducto = await prisma.product.create({
+      data: { name, stock, price, photo },
     });
+
     res.json(nuevoProducto);
   } catch (error) {
-    if (error.code === "P2002" && error.meta?.target?.includes("name")) {
-      return res.status(400).json({ mensaje: "Ya existe un producto con este nombre." });
+    if (error.code === 'P2002' && error.meta?.target?.includes('name')) {
+      return res.status(400).json({ mensaje: 'Ya existe un producto con este nombre.' });
     }
-    console.error("Error al crear el producto:", error);
-    res.status(500).json({ mensaje: "Error interno del servidor." });
+    console.error('Error al crear el producto:', error);
+    res.status(500).json({ mensaje: 'Error interno del servidor.' });
   }
-  //res.send("Finalizaod")
-  
 });
 
 
@@ -202,6 +203,46 @@ app.post('/images',upoad.single('foto'),(req,res)=>{
   );
   //res.send("Finalizaod")
 })
+
+
+app.post('/productosI', upoad.single('imagen'), async (req, res) => {
+  const { name, stock, price } = req.body;
+  const imagenPath = req.file.path;
+  try {
+      const cloudinaryResponse = await uploadToCloudinary(imagenPath); 
+      const imageUrl = cloudinaryResponse.url;
+
+      const resultado = await prisma.Product.create({
+          data: { 
+              name, 
+              stock: parseInt(stock),
+              price: parseFloat(price),
+              photo: imageUrl,
+              
+          }
+      });
+
+      res.json(resultado);
+  } catch (error) {
+      console.error('Error al subir la imagen:', error);
+      res.status(500).json({ mensaje: 'Error al subir la imagen' });
+  }
+});
+
+
+const uploadToCloudinary = (path) => {
+  return new Promise((resolve, reject) => {
+      cloudinary.uploader.upload(path, { public_id: 'imagen_prueba' },
+          (error, result) => {
+              if (error) {
+                  reject(error);
+              } else {
+                  resolve(result);
+              }
+          }
+      );
+  });
+};
 
 app.use((req, res)=>{
     res.status(404).send("not found")
